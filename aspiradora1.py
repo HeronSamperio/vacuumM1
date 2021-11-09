@@ -1,30 +1,20 @@
 import matplotlib.pyplot as plt
 import random
+import statistics as st
+from tkinter import messagebox
+import time
 from Node import *
 from copy import copy, deepcopy
 
-matrix = [
-    [1, 1, 1, 1, 1, 1],
-    [1, 0, 0, 0, 0, 1],
-    [1, 0, 0, 0, 0, 1],
-    [1, 0, 0, 0, 0, 1],
-    [1, 0, 0, 0, 0, 1],
-    [1, 1, 1, 1, 1, 1]
-]
 
-presentationMatrix = [
-    [1, 1, 1, 1, 1, 1],
-    [1, 0, 0, 0, 0, 1],
-    [1, 0, 0, 0, 0, 1],
-    [1, 0, 0, 0, 0, 1],
-    [1, 0, 0, 0, 0, 1],
-    [1, 1, 1, 1, 1, 1]
-]
+matrix = []
+presentationMatrix = []
 
 currLine = 1
 currCol = 1
 stack = [Node(1, 1)]
 solution = [Node(1, 1)]
+
 process_map = []
 
 
@@ -40,13 +30,13 @@ def renderMatrix(matrix):
     plt.imshow(matrix, 'gray')
     plt.show(block=False)
     plt.plot(currCol, currLine, '*r', 'LineWidth', 5)
-    plt.pause(0.5)
+    plt.pause(0.1)
     plt.clf()
 
 
-def createWorld(m):
-    for mI in range(1, 5):
-        for aI in range(1, 5):
+def createWorld(m,rows,cols):
+    for mI in range(1,(rows) - 1):
+        for aI in range(1,(cols) - 1):
             if (mI == 1 and aI == 1):
                 continue
             number = random.randint(0, 3)
@@ -127,15 +117,39 @@ def discoverPath():
             return auxNode
 
 
-def main():
+def main(t):
+    
     global matrix
     global process_map
     global stack
     global currCol
     global currLine
     
-    createWorld(matrix)
-
+    n = 0
+    m = 0
+    
+    while(n<=3 and m <=3):
+        print("\nn o m debe ser mayor a 3")
+        n = int(input("Alto de la matriz: "))
+        m = int(input("Ancho de la matriz: "))
+        
+    rows, cols = (n, m)
+    matrix=[]
+   
+    for i in range(rows):
+       col = []
+       for j in range(cols):
+           if(i==0 or j==0 or j==m-1 or i==n-1):
+               col.append(1)
+           else:
+               col.append(0)
+       matrix.append(col)
+    
+    
+    createWorld(matrix,n,m)
+    
+    start = time.time() #inicio
+    
     while (mapNotClean()):
         path = discoverPath()
         x = path.get_x()
@@ -152,14 +166,33 @@ def main():
         matrix[x][y] = 0
         stack = [Node(x, y)]
         process_map = deepcopy(matrix)
-
+        
+    inicio=time.time()
+    tiempo=0
+    
     for path in solution:
-        currCol = path.get_y()
-        currLine = path.get_x()
+        if(tiempo>=t+0.15):
+            renderMatrix(presentationMatrix)
+            messagebox.showinfo("!!!!","Limite de tiempo excedido")
+            exit
+            break
+        else:
+            currCol = path.get_y()
+            currLine = path.get_x()
+            renderMatrix(presentationMatrix)
+            if (presentationMatrix[currLine][currCol] == 2):
+                presentationMatrix[currLine][currCol] = 0
+            print(tiempo)
+        tiempo = time.time()-inicio
         renderMatrix(presentationMatrix)
-        if (presentationMatrix[currLine][currCol] == 2):
-            presentationMatrix[currLine][currCol] = 0
-    renderMatrix(presentationMatrix)
-
+        
+        messagebox.showinfo("Tarea","Tiempo de limpieza: " +str("%.3f"%tiempo) + " segundos")  
+        
+        messagebox.showinfo(
+            "Tarea","Cantidad de movimientos:\n" +
+            "1._"+(len(solution) - 1)
+            
+            
 if __name__ == "__main__":
-    main()
+    t=int(input("Ingresa el tiempo limite "))
+    main(t)

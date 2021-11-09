@@ -1,43 +1,34 @@
 #A01276217-A01276214
 import matplotlib.pyplot as plt
 import random
+import statistics as st
+from tkinter import messagebox
+import time
 from Node import *
 from copy import copy, deepcopy
 
-matrix = [
-    [1, 1, 1, 1, 1, 1, 1, 1],
-    [1, 0, 0, 0, 0, 0, 0, 1],
-    [1, 0, 0, 0, 0, 0, 0, 1],
-    [1, 0, 0, 0, 0, 0, 0, 1],
-    [1, 0, 0, 0, 0, 0, 0, 1],
-    [1, 0, 0, 0, 0, 0, 0, 1],
-    [1, 0, 0, 0, 0, 0, 0, 1],
-    [1, 1, 1, 1, 1, 1, 1, 1]
-]
+matrix = []
 
-presentationMatrix = [
-    [1, 1, 1, 1, 1, 1, 1, 1],
-    [1, 0, 0, 0, 0, 0, 0, 1],
-    [1, 0, 0, 0, 0, 0, 0, 1],
-    [1, 0, 0, 0, 0, 0, 0, 1],
-    [1, 0, 0, 0, 0, 0, 0, 1],
-    [1, 0, 0, 0, 0, 0, 0, 1],
-    [1, 0, 0, 0, 0, 0, 0, 1],
-    [1, 1, 1, 1, 1, 1, 1, 1]
-]
+presentationMatrix = []
 
-currLine = 6
-currCol = 6
-stack = [Node(6, 6)]
-solution = [Node(6, 6)]
+q=0
+w=0
+
+currLine = 1
+currCol = 1
+stack = [Node(1, 1)]
+solution = [Node(1, 1)]
+
 currLine1 = 1
 currCol1 = 1
 stack1 = [Node(1, 1)]
 solution1 = [Node(1, 1)]
-currLine2 = 6
+
+currLine2 = 1
 currCol2 = 1
-stack2 = [Node(6, 1)]
-solution2 = [Node(6, 1)]
+stack2 = [Node(1, 1)]
+solution2 = [Node(1, 1)]
+
 process_map = []
 
 def mapNotClean():
@@ -58,19 +49,16 @@ def renderMatrix(matrix):
     plt.clf()
 
 #genera el tablero con datos aleatorios
-def createWorld(m):#implementar verificar si la cantidad de cuadros sucios es par 
-    global presentationMatrix
-    x= len(presentationMatrix)
-    y=0
-    for mI in range(1, x-1):
-        for aI in range(1, x-1):
+def createWorld(m,rows,cols):
+    for mI in range(1,(rows) - 1):
+        for aI in range(1,(cols) - 1):
             if (mI == 1 and aI == 1):
                 continue
             number = random.randint(0, 3)
             m[mI][aI] = 2 if number == 1 else 0
-
     renderMatrix(matrix)
     global process_map
+    global presentationMatrix
     process_map = deepcopy(matrix)
     presentationMatrix = deepcopy(matrix)
 
@@ -287,7 +275,9 @@ def discoverPath2():
         if (auxNode):
             return auxNode
 
-def main():
+def main(t):
+    global q
+    global w
     global matrix
     global process_map
     global stack
@@ -300,7 +290,38 @@ def main():
     global currCol2
     global currLine2
     
-    createWorld(matrix)
+    while(q<=5 and w<=5):
+        
+        print("\nn o m debe ser mayor a 5")
+        w = int(input("Dame el alto de la matriz: "))
+        q = int(input("Dame el ancho de la matriz: "))
+        
+    rows, cols = (q+1, w+1)
+    
+    matrix=[]
+    
+    for i in range(rows):
+        col = []
+        for j in range(cols):
+            if(i==0 or j==0 or j==w-1 or i==q-1):
+                col.append(1)
+            else:
+                col.append(0)
+        matrix.append(col)
+    
+    currLine = q-2
+    currCol = w-2
+    stack = [Node(q-2, w-2)]
+    solution = [Node(q-2, w-2)]
+    
+    currLine2 = q-4
+    currCol2 = w-4
+    stack2 = [Node(q-4, w-4)]
+    solution2 = [Node(q-4, w-4)]
+    
+    
+    createWorld(matrix,q,w)
+    
 
     while (mapNotClean()):
         try:
@@ -346,10 +367,16 @@ def main():
         process_map = deepcopy(matrix)
         
         aux_list = []
-        while (path.get_parent() is not None):
-            process_map[path.get_x()][path.get_y()] = 3
-            aux_list.append(path)
-            path = path.get_parent()
+        try:
+            while (path.get_parent() is not None):
+                process_map[path.get_x()][path.get_y()] = 3
+                aux_list.append(path)
+                path = path.get_parent()
+        except:
+            while (path2.get_parent() is not None):
+                process_map[path.get_x()][path.get_y()] = 3
+                aux_list.append(path)
+                path = path.get_parent()
         aux_list.reverse()
         solution.extend(aux_list)
         
@@ -357,8 +384,17 @@ def main():
         stack = [Node(x, y)]
         process_map = deepcopy(matrix)
     
-    for x in range(len(solution)+3):
-        try:
+    
+    inicio=time.time()
+    tiempo=0
+    i=q*w
+    
+    for x in range(i):
+        if(tiempo>=t+0.02):
+            renderMatrix(presentationMatrix)
+            messagebox.showinfo("!!!!","Limite de tiempo excedido")
+            break
+        else:
             path2=solution2[x]
             path1=solution1[x]
             path=solution[x]
@@ -376,44 +412,20 @@ def main():
             if (presentationMatrix[currLine][currCol] == 2):
                 presentationMatrix[currLine][currCol] = 0    
             renderMatrix(presentationMatrix)
-        except IndexError:
-            try:
-                path2=solution[x]
-                path1=solution[x]
-                path=solution[x]
-                currCol2 = path2.get_y()
-                currLine2 = path2.get_x()
-                currCol1 = path1.get_y()
-                currLine1 = path1.get_x()
-                currCol = path.get_y()
-                currLine = path.get_x()
-                renderMatrix(presentationMatrix)
-                if (presentationMatrix[currLine2][currCol2] == 2):
-                    presentationMatrix[currLine2][currCol2] = 0
-                if (presentationMatrix[currLine1][currCol1] == 2):
-                    presentationMatrix[currLine1][currCol1] = 0
-                if (presentationMatrix[currLine][currCol] == 2):
-                    presentationMatrix[currLine][currCol] = 0    
-                renderMatrix(presentationMatrix)
-            except IndexError:
-                path2=solution[x]
-                path1=solution2[x]
-                path=solution[x]
-                currCol2 = path2.get_y()
-                currLine2 = path2.get_x()
-                currCol1 = path1.get_y()
-                currLine1 = path1.get_x()
-                currCol = path.get_y()
-                currLine = path.get_x()
-                renderMatrix(presentationMatrix)
-                if (presentationMatrix[currLine2][currCol2] == 2):
-                    presentationMatrix[currLine2][currCol2] = 0
-                if (presentationMatrix[currLine1][currCol1] == 2):
-                    presentationMatrix[currLine1][currCol1] = 0
-                if (presentationMatrix[currLine][currCol] == 2):
-                    presentationMatrix[currLine][currCol] = 0    
-                renderMatrix(presentationMatrix)
+            print(tiempo)
+            tiempo = time.time()-inicio
+            
+    messagebox.showinfo("Tarea","Tiempo de limpieza: " +str("%.3f"%tiempo) + " segundos")
+    
+    messagebox.showinfo(
+        "Tarea","Cantidad de movimientos:\n" +
+        "1._"+(len(solution) - 1) + "\n"+
+        "2._"+(len(solution1) - 1) + "\n"
+        "3._"+(len(solution2) - 1)
+        )
     
     
 if __name__ == "__main__":
-    main()
+    print("Tome en cuenta que el renderizado toma .2 segundos")
+    t=int(input("Ingresa el tiempo limite "))
+    main(t)
