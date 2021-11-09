@@ -1,41 +1,30 @@
 #A01276217-A01276214
 import matplotlib.pyplot as plt
 import random
+import statistics as st
+from tkinter import messagebox
+import time
 from Node import *
 from copy import copy, deepcopy
 
 
-matrix = [
-    [1, 1, 1, 1, 1, 1, 1, 1],
-    [1, 0, 0, 0, 0, 0, 0, 1],
-    [1, 0, 0, 0, 0, 0, 0, 1],
-    [1, 0, 0, 0, 0, 0, 0, 1],
-    [1, 0, 0, 0, 0, 0, 0, 1],
-    [1, 0, 0, 0, 0, 0, 0, 1],
-    [1, 0, 0, 0, 0, 0, 0, 1],
-    [1, 1, 1, 1, 1, 1, 1, 1]
-]
+matrix = []
 
-presentationMatrix = [
-    [1, 1, 1, 1, 1, 1, 1, 1],
-    [1, 0, 0, 0, 0, 0, 0, 1],
-    [1, 0, 0, 0, 0, 0, 0, 1],
-    [1, 0, 0, 0, 0, 0, 0, 1],
-    [1, 0, 0, 0, 0, 0, 0, 1],
-    [1, 0, 0, 0, 0, 0, 0, 1],
-    [1, 0, 0, 0, 0, 0, 0, 1],
-    [1, 1, 1, 1, 1, 1, 1, 1]
-]
+presentationMatrix = []
 
-# The robot always starts at matrix[1][1]
-currLine = 6
-currCol = 6
-stack = [Node(6, 6)]
-solution = [Node(6, 6)]
+q=0
+w=0
+
+currLine = 1
+currCol = 1
+stack = [Node(1, 1)]
+solution = [Node(1, 1)]
+
 currLine1 = 1
 currCol1 = 1
 stack1 = [Node(1, 1)]
 solution1 = [Node(1, 1)]
+
 process_map = []
 
 #verifica si el tablero esta limpio
@@ -52,23 +41,20 @@ def renderMatrix(matrix):
     plt.show(block=False)
     plt.plot(currCol, currLine, '*r', 'LineWidth', 5)
     plt.plot(currCol1, currLine1, '*c', 'LineWidth', 5)
-    plt.pause(0.3)
+    plt.pause(0.2)
     plt.clf()
 
 #genera el tablero con datos aleatorios
-def createWorld(m):#implementar verificar si la cantidad de cuadros sucios es par 
-    global presentationMatrix
-    x= len(presentationMatrix)
-    y=0
-    for mI in range(1, x-1):
-        for aI in range(1, x-1):
+def createWorld(m,rows,cols):
+    for mI in range(1,(rows) - 1):
+        for aI in range(1,(cols) - 1):
             if (mI == 1 and aI == 1):
                 continue
             number = random.randint(0, 3)
             m[mI][aI] = 2 if number == 1 else 0
-
     renderMatrix(matrix)
     global process_map
+    global presentationMatrix
     process_map = deepcopy(matrix)
     presentationMatrix = deepcopy(matrix)
 
@@ -215,8 +201,9 @@ def discoverPath1():
             return auxNode
         
 
-def main():
-    global matrix
+def main(t):
+    global q
+    global w
     global process_map
     global stack
     global stack1
@@ -224,8 +211,33 @@ def main():
     global currLine
     global currCol1
     global currLine1
+    global matrix
     
-    createWorld(matrix)
+    while(q<=3 and w<=3):
+        print("\nn o m debe ser mayor a 3")
+        w = int(input("Dame el alto de la matriz: "))
+        q = int(input("Dame el ancho de la matriz: "))
+        
+    rows, cols = (q, w)
+    matrix=[]
+    
+    for i in range(rows):
+        col = []
+        for j in range(cols):
+            if(i==0 or j==0 or j==w-1 or i==q-1):
+                col.append(1)
+            else:
+                col.append(0)
+        matrix.append(col)
+    
+    currLine = q-2
+    currCol = w-2
+    stack = [Node(q-2, w-2)]
+    solution = [Node(q-2, w-2)]
+    
+    createWorld(matrix,q,w)
+    
+    start = time.time() #inicio
     
     while (mapNotClean()):
         try:
@@ -255,6 +267,7 @@ def main():
         stack1 = [Node(x1, y1)]
         process_map = deepcopy(matrix)
         
+        
         aux_list = []
         while (path.get_parent() is not None):
             process_map[path.get_x()][path.get_y()] = 3
@@ -266,55 +279,96 @@ def main():
         matrix[x][y] = 0
         stack = [Node(x, y)]
         process_map = deepcopy(matrix)
-        
-    for x in range(len(solution)+1):
-        try:
-            path1=solution1[x]
-            path=solution[x]
-            currCol1 = path1.get_y()
-            currLine1 = path1.get_x()
-            currCol = path.get_y()
-            currLine = path.get_x()
-            #renderMatrix(presentationMatrix)
-            if (presentationMatrix[currLine1][currCol1] == 2):
-                presentationMatrix[currLine1][currCol1] = 0
-            if (presentationMatrix[currLine][currCol] == 2):
-                presentationMatrix[currLine][currCol] = 0
+       
+    inicio=time.time()
+    tiempo=0
+    i=q*w
+    for x in range(i):
+        if(tiempo>=t+0.02):
             renderMatrix(presentationMatrix)
-        except IndexError:
+            messagebox.showinfo("!!!!","Limite de tiempo excedido")
+            break
+        else:
             try:
-                path1=solution[x]
-                path=solution[x]
-            except IndexError:
                 path1=solution1[x]
                 path=solution[x]
                 currCol1 = path1.get_y()
                 currLine1 = path1.get_x()
                 currCol = path.get_y()
                 currLine = path.get_x()
-                renderMatrix(presentationMatrix)
+                #renderMatrix(presentationMatrix)
                 if (presentationMatrix[currLine1][currCol1] == 2):
                     presentationMatrix[currLine1][currCol1] = 0
                 if (presentationMatrix[currLine][currCol] == 2):
                     presentationMatrix[currLine][currCol] = 0
+                print(tiempo)
+                tiempo = time.time()-inicio
                 renderMatrix(presentationMatrix)
-        except IndexError:
-            try:
-                path1=solution1[x]
-                path=solution1[x]
             except IndexError:
-                path1=solution1[x]
-                path=solution[x]
-                currCol1 = path1.get_y()
-                currLine1 = path1.get_x()
-                currCol = path.get_y()
-                currLine = path.get_x()
-                renderMatrix(presentationMatrix)
-                if (presentationMatrix[currLine1][currCol1] == 2):
-                    presentationMatrix[currLine1][currCol1] = 0
-                if (presentationMatrix[currLine][currCol] == 2):
-                    presentationMatrix[currLine][currCol] = 0
-                renderMatrix(presentationMatrix)
-            
+                try:
+                    path1=solution[x]
+                    path=solution[x]
+                    currCol1 = path1.get_y()
+                    currLine1 = path1.get_x()
+                    currCol = path.get_y()
+                    currLine = path.get_x()
+                    renderMatrix(presentationMatrix)
+                    if (presentationMatrix[currLine1][currCol1] == 2):
+                        presentationMatrix[currLine1][currCol1] = 0
+                    if (presentationMatrix[currLine][currCol] == 2):
+                        presentationMatrix[currLine][currCol] = 0
+                    print(tiempo)
+                    tiempo = time.time()-inicio
+                    renderMatrix(presentationMatrix)
+                except IndexError:
+                    try:
+                        path1=solution1[x]
+                    except IndexError:
+                        path1=solution[x]
+                    except:
+                        path1=solution1[x]
+                        path=solution[x]
+                    currCol1 = path1.get_y()
+                    currLine1 = path1.get_x()
+                    currCol = path.get_y()
+                    currLine = path.get_x()
+                    renderMatrix(presentationMatrix)
+                    if (presentationMatrix[currLine1][currCol1] == 2):
+                        presentationMatrix[currLine1][currCol1] = 0
+                    if (presentationMatrix[currLine][currCol] == 2):
+                        presentationMatrix[currLine][currCol] = 0
+                    print(tiempo)
+                    tiempo = time.time()-inicio
+                    renderMatrix(presentationMatrix)
+            except IndexError:
+                try:
+                    path1=solution1[x]
+                    path=solution1[x]
+                except IndexError:
+                    path1=solution1[x]
+                    path=solution[x]
+                    currCol1 = path1.get_y()
+                    currLine1 = path1.get_x()
+                    currCol = path.get_y()
+                    currLine = path.get_x()
+                    renderMatrix(presentationMatrix)
+                    if (presentationMatrix[currLine1][currCol1] == 2):
+                        presentationMatrix[currLine1][currCol1] = 0
+                    if (presentationMatrix[currLine][currCol] == 2):
+                        presentationMatrix[currLine][currCol] = 0
+                    renderMatrix(presentationMatrix)
+                    print(tiempo)
+                    tiempo = time.time()-inicio
+                    
+    messagebox.showinfo("Tarea","Tiempo de limpieza: " +str("%.3f"%tiempo) + " segundos")
+    
+    messagebox.showinfo(
+        "Tarea","Cantidad de movimientos:\n" +
+        "1._"+(len(solution) - 1) + "\n"+
+        "2._"+(len(solution1) - 1)
+        )
+    
+    
 if __name__ == "__main__":
-    main()
+    t=int(input("Ingresa el tiempo limite "))
+    main(t)
