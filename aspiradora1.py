@@ -34,9 +34,9 @@ def renderMatrix(matrix):
     plt.clf()
 
 
-def createWorld(m,rows,cols):
-    for mI in range(1,(rows) - 1):
-        for aI in range(1,(cols) - 1):
+def createWorld(m, rows, cols):
+    for mI in range(1, (rows) - 1):
+        for aI in range(1, (cols) - 1):
             if (mI == 1 and aI == 1):
                 continue
             number = random.randint(0, 3)
@@ -118,38 +118,37 @@ def discoverPath():
 
 
 def main(t):
-    
+
     global matrix
     global process_map
     global stack
     global currCol
     global currLine
-    
+
     n = 0
     m = 0
-    
-    while(n<=3 and m <=3):
+
+    while(n <= 3 and m <= 3):
         print("\nn o m debe ser mayor a 3")
         n = int(input("Alto de la matriz: "))
         m = int(input("Ancho de la matriz: "))
-        
+
     rows, cols = (n, m)
-    matrix=[]
-   
+    matrix = []
+
     for i in range(rows):
-       col = []
-       for j in range(cols):
-           if(i==0 or j==0 or j==m-1 or i==n-1):
-               col.append(1)
-           else:
-               col.append(0)
-       matrix.append(col)
-    
-    
-    createWorld(matrix,n,m)
-    
-    start = time.time() #inicio
-    
+        col = []
+        for j in range(cols):
+            if(i == 0 or j == 0 or j == m-1 or i == n-1):
+                col.append(1)
+            else:
+                col.append(0)
+        matrix.append(col)
+
+    createWorld(matrix, n, m)
+
+    start = time.time()  # inicio
+
     while (mapNotClean()):
         path = discoverPath()
         x = path.get_x()
@@ -166,14 +165,14 @@ def main(t):
         matrix[x][y] = 0
         stack = [Node(x, y)]
         process_map = deepcopy(matrix)
-        
-    inicio=time.time()
-    tiempo=0
-    
+
+    inicio = time.time()
+    tiempo = 0
+
     for path in solution:
-        if(tiempo>=t+0.15):
+        if(tiempo >= t+0.15):
             renderMatrix(presentationMatrix)
-            messagebox.showinfo("!!!!","Limite de tiempo excedido")
+            messagebox.showinfo("Time", "Limite de tiempo excedido")
             exit
             break
         else:
@@ -185,14 +184,16 @@ def main(t):
             print(tiempo)
         tiempo = time.time()-inicio
         renderMatrix(presentationMatrix)
-        
-        messagebox.showinfo("Tarea","Tiempo de limpieza: " +str("%.3f"%tiempo) + " segundos")  
-        
-        messagebox.showinfo(
-            "Tarea","Cantidad de movimientos:\n" +
-            "1._"+(len(solution) - 1)
-            
-            
+
+    messagebox.showinfo(
+        "Tarea", "Tiempo de limpieza: " + str("%.3f" % tiempo) + " segundos"
+    )
+
+    messagebox.showinfo(
+        "Tarea", "Cantidad de movimientos:\n" + str(len(solution) - 1)
+    )
+
+
 if __name__ == "__main__":
-    t=int(input("Ingresa el tiempo limite "))
+    t = int(input("Ingresa el tiempo limite "))
     main(t)

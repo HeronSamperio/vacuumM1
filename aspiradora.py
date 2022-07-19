@@ -1,4 +1,3 @@
-#A01276217-A01276214
 import matplotlib.pyplot as plt
 import random
 import statistics as st
@@ -20,11 +19,6 @@ currCol = 1
 stack = [Node(1, 1)]
 solution = [Node(1, 1)]
 
-currLine1 = 1
-currCol1 = 1
-stack1 = [Node(1, 1)]
-solution1 = [Node(1, 1)]
-
 process_map = []
 
 #verifica si el tablero esta limpio
@@ -40,7 +34,7 @@ def renderMatrix(matrix):
     plt.imshow(matrix, 'gray')
     plt.show(block=False)
     plt.plot(currCol, currLine, '*r', 'LineWidth', 5)
-    plt.plot(currCol1, currLine1, '*c', 'LineWidth', 5)
+    plt.plot(currCol, currLine, '*r', 'LineWidth', 5)
     plt.pause(0.2)
     plt.clf()
 
@@ -340,25 +334,6 @@ def main(t):
                     print(tiempo)
                     tiempo = time.time()-inicio
                     renderMatrix(presentationMatrix)
-            except IndexError:
-                try:
-                    path1=solution1[x]
-                    path=solution1[x]
-                except IndexError:
-                    path1=solution1[x]
-                    path=solution[x]
-                    currCol1 = path1.get_y()
-                    currLine1 = path1.get_x()
-                    currCol = path.get_y()
-                    currLine = path.get_x()
-                    renderMatrix(presentationMatrix)
-                    if (presentationMatrix[currLine1][currCol1] == 2):
-                        presentationMatrix[currLine1][currCol1] = 0
-                    if (presentationMatrix[currLine][currCol] == 2):
-                        presentationMatrix[currLine][currCol] = 0
-                    renderMatrix(presentationMatrix)
-                    print(tiempo)
-                    tiempo = time.time()-inicio
                     
     messagebox.showinfo("Tarea","Tiempo de limpieza: " +str("%.3f"%tiempo) + " segundos")
     
